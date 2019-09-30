@@ -1,0 +1,42 @@
+#include "snappy.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include<iostream>
+int main(){
+    struct snappy_env en;
+    snappy_init_env(&en);
+    if(snappy_init_env(&en)==0){
+        printf("Success");
+    }
+    // else{
+    //     printf("fail");
+    //     exit(1);
+    // }
+    char * in = "/home/shreyank/Documents/AOS/Project_2/project_2-master/input/Tiny.txt";
+    //char * out = "/home/shreyank/Documents/AOS/Project_2/project_2-master/input/Tiny.zip";
+    char out[1000];
+    FILE* fp = fopen(in, "r");
+    //fseek(fp, 0L, SEEK_END);
+    //size_t res = ftell(fp);
+   // printf("%ld",res); 
+    char input_str[10000];
+    int c;
+    int i=0;
+  
+    
+    //size_t max_comp_len = snappy_max_compressed_length(sizeof("Hello World!"));
+   //snappy_compress(&en,"Hello World!", 12, out, &max_comp_len);
+    while ((c = getc(fp)) != EOF)
+       { 
+           fscanf(fp,"%s",input_str);
+           printf("%s",input_str);
+           i++;
+
+      //  printf("asas");
+()       }
+    for(int j=0;j<100;j++)
+    
+    fclose(fp);
+    return 0;
+
+}
