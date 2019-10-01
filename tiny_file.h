@@ -25,6 +25,7 @@ typedef struct
     int compressed_size;
     key_t key;
     int flag;
+    char compressed_file[10000];
     queue_t queue[QUEUE_SIZE];
 
 }stats;

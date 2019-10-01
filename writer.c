@@ -47,9 +47,9 @@ int main()
 		sleep(1);
 	
 	
-	char*out= (char*)calloc(st->uncompressed_size, sizeof(char));
+	//char*out= (char*)calloc(st->uncompressed_size, sizeof(char));
 	//memcpy(&out[0],&compressed_file[1],st->compressed_size);
-	snappy_uncompress(out,st->compressed_size,uncompressed);
+	snappy_uncompress(st->compressed_file,st->compressed_size,uncompressed);
 	printf("Uncompressed Size is\t%s\n",uncompressed);
 	shmdt(st_2);
 	

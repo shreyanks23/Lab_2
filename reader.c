@@ -51,6 +51,9 @@ size_t max_comp_len = snappy_max_compressed_length(sizeof(buffer));
 
 
 snappy_compress(&en,buffer, res, out, &max_comp_len);
+//st->compressed_file = (char*)malloc(sizeof(max_comp_len));
+//st->compressed_file = out;
+memcpy(st->compressed_file,out,max_comp_len);
 size_t uncompressedLength;
 snappy_uncompress(out,max_comp_len,uncompressed);
 snappy_uncompressed_length(out,max_comp_len,&uncompressedLength);
