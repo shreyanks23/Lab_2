@@ -1,29 +1,37 @@
-#include "snappy.h"
 #include <sys/ipc.h> 
 #include <sys/shm.h> 
 #include <stdio.h> 
-#include <stdlib.h>
-#include <string.h>
+ #include <stdlib.h>
+ #include<string.h>
+#include "snappy.h"
+#include "tiny_file.h"
 int main() 
 { 
 	// ftok to generate unique key 
 	key_t key = ftok("shmfile",65); 
-
+	stats *st = (stats*)malloc(sizeof(stats));
+	//stats* strin = (stats*)malloc(sizeof(stats));
+	// st = get_data();
+	//printf("%d",st->key);
 	// shmget returns an identifier in shmid 
-	int shmid = shmget(key,8,0666|IPC_CREAT); 
+	
+	
+	int shmid = shmget(key,sizeof(stats),0666|IPC_CREAT); 
 
 	// shmat to attach to shared memory 
-	char *strin = (char*) shmat(shmid,(void*)0,0); 
+	stats*strin = (stats*) shmat(shmid,NULL,0); 
+	st = strin;
+	printf("WHATTT %s",st->file_path);
 
+	
 
-  char*in = strin;
-  
-
-FILE* fp = fopen(in, "r");
+FILE* fp = fopen(st->file_path, "r");
 fseek(fp, 0L, SEEK_END);
 size_t res = ftell(fp);
 fseek(fp,0L,SEEK_SET);
 printf("size %ld\n",res); 
+
+
 
 
 char*buffer;
@@ -49,31 +57,20 @@ snappy_uncompressed_length(out,max_comp_len,&uncompressedLength);
 
 printf("Size UC %ld\t C %ld\n",uncompressedLength,max_comp_len);
 //printf("The file called test.dat contains this text\n\n%s", uncompressed);	
+st->compressed_size = max_comp_len;
+st->uncompressed_size = res;
 
 
-// memcpy(strin,out,uncompressedLength);
-  
-	//detach from shared memory 
-	shmdt(strin); 
-	
-	// destroy the shared memory 
-	shmctl(shmid,IPC_RMID,NULL); 
+
+strin = (stats*) shmat(shmid,(void*)0,0);
+
+memcpy(strin,st,sizeof(stats));
 
 
-  // key_t key2 = ftok("shmfile",65); 
+strin->flag=1;
 
-	// // shmget returns an identifier in shmid 
-	 int shmid2 = shmget(4500,max_comp_len,0666|IPC_CREAT); 
-
-	// // shmat to attach to shared memory 
-	 char *strin2 = (char*) shmat(shmid2,(void*)0,0);
-
-   memcpy(strin2,out,max_comp_len);
-
-    *strin2 = '*';
-
-   shmdt(strin2); 
-   shmctl(shmid2,IPC_RMID,NULL); 
+shmdt(strin); 
+shmctl(shmid,IPC_RMID,NULL); 
  
   
   

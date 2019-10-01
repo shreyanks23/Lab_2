@@ -4,49 +4,54 @@
  #include <stdlib.h>
  #include<string.h>
 #include "snappy.h"
+#include "tiny_file.h"
 int main() 
 {
 	
 	char* input_file = "Tiny.txt";
 	    
 	// ftok to generate unique key 
-	key_t key = ftok("shmfile",65); 
+	key_t key = ftok("shmfile",65);
+	stats*st = (stats*)malloc(sizeof(stats));
+	//stats*st_2 = (stats*)malloc(sizeof(stats));
+	st->key = key;
+	printf("Key is %d",key);
+	for(int i=0;i<QUEUE_SIZE;i++)
+	{
+		st->queue[i].val=0;
+	}
 
-	// shmget returns an identifier in shmid 
-	int shmid = shmget(key,sizeof(input_file)+1,0666|IPC_CREAT); 
+	st->file_path_size = sizeof(input_file);
+	st->flag=0;
+
+	memcpy(st->file_path,input_file,sizeof(input_file));
+
+	int shmid = shmget(key,sizeof(stats),0666|IPC_CREAT); 
 	
 	// shmat to attach to shared memory 
-	char*str = (char*) shmat(shmid,(void*)0,0); 
+	stats*st_2 = (stats*) shmat(shmid,NULL,0); 
 	
-	char*s = str;
-
-	// for(int i=0;i<sizeof(input_file);i++){
-	// 	s[i] = input_file[i];
-	// }
-	// s[sizeof(input_file)]=NULL;
-	memcpy(str,input_file,sizeof(input_file));
+	
+	memcpy(st_2,st,sizeof(stats)); 
 	
 
-	printf("Data written in memory: %s\n",str); 
+	printf("File name written in memory: %s\n",st_2->file_path); 
+	printf("Struct size is %ld\n",sizeof(stats));
 	
-	// while (*str != '*')
-    //     sleep(1);
-
-
-	int shmid2 = shmget(4500,3057,0666|IPC_CREAT); 
-	char* compressed_file = (char*) shmat(shmid2,(void*)0,0); 
-	char*out= (char*)calloc(40000, sizeof(char));
+	st_2 = (stats*) shmat(shmid,NULL,0); 
+	st = st_2;
 	
 	char* uncompressed;
-	uncompressed = (char*)calloc(40000, sizeof(char));
-	while(*compressed_file!='*')
+	uncompressed = (char*)calloc(st->uncompressed_size, sizeof(char));
+	while(st_2->flag==0)
 		sleep(1);
 	
-
-	memcpy(&out[0],&compressed_file[1],3100);
-	snappy_uncompress(out,3100,uncompressed);
-	printf("%s\n",uncompressed);
-	shmdt(compressed_file);
+	
+	char*out= (char*)calloc(st->uncompressed_size, sizeof(char));
+	//memcpy(&out[0],&compressed_file[1],st->compressed_size);
+	snappy_uncompress(out,st->compressed_size,uncompressed);
+	printf("Uncompressed Size is\t%s\n",uncompressed);
+	shmdt(st_2);
 	
 
 	return 0; 
