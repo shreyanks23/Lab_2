@@ -9,54 +9,9 @@
 #include <pthread.h>
 
 
+void server_call(queue_t *queue_shared, int n_sms, int sms_size, int msgid,int msgid2, char* input_char, int *shmid_arr )
 
-
-int main() 
-{ 
-
-	printf("here");
-	int sms_size=64;
-	int n_sms = 5;
-	key_t *key_arr  = (key_t*)malloc(10*sizeof(key_t));
-	int *shmid_arr = (int*)malloc(10*sizeof(int));
-	char *input_char = (char*) malloc(sms_size);
-	key_t msg_key = ftok(first_key,65);
-	key_t msg_key2 = ftok(second_key,65);
-	int msgid;
-	if((msgid = msgget(10, 0666|IPC_CREAT))==-1){
-		perror("msgget error");
-	}
-	int msgid2 = msgget(25, 0666|IPC_CREAT);
-	queue_t* queue_shared = (queue_t*)malloc(sizeof(queue_t));
-
-	for(int i=0;i<n_sms;i++){
-		key_arr[i] = i;
-		shmid_arr[i] = shmget(key_arr[i], sms_size, 0666|IPC_CREAT);
-	}
-
-	queue_initialize(queue_shared);
-	queue_shared->val = 1;
-	
-	printf("%d",msgid);
-	if((msgsnd(msgid,queue_shared,sizeof(queue_t),0))==-1 )
-	{
-		perror("msgsnd error");
-		exit(1);
-	}
-	queue_shared->val=0;
-	msgrcv(msgid2,queue_shared,sizeof(queue_t),0,0);
-
-	msgctl(msgid, IPC_RMID, NULL); 
-	msgctl(msgid2, IPC_RMID, NULL);
-
-	msgid = msgget(10, 0666|IPC_CREAT);
-	msgid2 = msgget(25, 0666 | IPC_CREAT); 
-	queue_shared->val=1;
-	
-
-
-
-//////////////////////////////////////////////////////////////
+{
 	char *input_file = (char*) malloc(queue_shared->size_file);
 	printf("END FLAG HERE IS %d",queue_shared->end_flag);
 	
@@ -137,6 +92,56 @@ int count=0;
 
 	queue_shared->end_flag=1;
 	msgsnd(msgid,queue_shared,sizeof(queue_t),0);
+}
+
+
+int main() 
+{ 
+
+	printf("here");
+	int sms_size=64;
+	int n_sms = 5;
+	key_t *key_arr  = (key_t*)malloc(10*sizeof(key_t));
+	int *shmid_arr = (int*)malloc(10*sizeof(int));
+	char *input_char = (char*) malloc(sms_size);
+	key_t msg_key = ftok(first_key,65);
+	key_t msg_key2 = ftok(second_key,65);
+	int msgid;
+	if((msgid = msgget(10, 0666|IPC_CREAT))==-1){
+		perror("msgget error");
+	}
+	int msgid2 = msgget(25, 0666|IPC_CREAT);
+	queue_t* queue_shared = (queue_t*)malloc(sizeof(queue_t));
+
+	for(int i=0;i<n_sms;i++){
+		key_arr[i] = i;
+		shmid_arr[i] = shmget(key_arr[i], sms_size, 0666|IPC_CREAT);
+	}
+
+	queue_initialize(queue_shared);
+	queue_shared->val = 1;
+	
+	printf("%d",msgid);
+	if((msgsnd(msgid,queue_shared,sizeof(queue_t),0))==-1 )
+	{
+		perror("msgsnd error");
+		exit(1);
+	}
+	queue_shared->val=0;
+	msgrcv(msgid2,queue_shared,sizeof(queue_t),0,0);
+
+	msgctl(msgid, IPC_RMID, NULL); 
+	msgctl(msgid2, IPC_RMID, NULL);
+
+	msgid = msgget(10, 0666|IPC_CREAT);
+	msgid2 = msgget(25, 0666 | IPC_CREAT); 
+	queue_shared->val=1;
+	
+
+
+
+//////////////////////////////////////////////////////////////
+server_call(queue_shared,n_sms,sms_size,msgid,msgid2,input_char,shmid_arr);
 
 //////////////////////////////////////////////////////////////////////
 	return 0; 
